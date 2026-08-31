@@ -1,27 +1,30 @@
 # Kova
 
-An AI that makes stuff. Describe a small app or tool in plain English, and Kova generates a working, self-contained web app for it — instantly previewable in your browser, editable via follow-up instructions, and downloadable as a single HTML file.
+Kova makes small web apps from a plain-English description — a pomodoro timer, a color palette generator, a tic-tac-toe game, and more.
 
-## How it works
+It is **not powered by any AI company's API**. There's no model, no account, no API key, and nothing ever leaves your browser. Every app it can build is a real, hand-written blueprint in [`templates.js`](./templates.js); Kova matches your description against those blueprints by keyword and assembles the result — instantly, offline-capable, and fully inspectable (it's about 500 lines of plain JavaScript, no build step, no dependencies).
 
-- The frontend (`public/`) sends your description to the backend.
-- The backend (`server.js`) asks Claude to produce a single self-contained HTML document (inline CSS/JS, no external dependencies) implementing your request.
-- The result renders live in a sandboxed `<iframe>` preview, with a code view and download option.
-- Follow-up instructions ("make the buttons rounder", "add a dark mode toggle") are sent back to Claude along with the current code, so it can refine the app in place.
+## Running it
 
-## Setup
+It's a static site — three files (`index.html`, `style.css`, `app.js`) plus the blueprint library (`templates.js`). Open `index.html` directly in a browser, or serve the folder with anything that serves static files:
 
 ```bash
-npm install
-cp .env.example .env   # then add your ANTHROPIC_API_KEY
-npm start
+python3 -m http.server 8080
+# or
+npx serve .
 ```
 
-Visit `http://localhost:3000`.
+## Hosting it on the internet (GitHub Pages)
 
-If you've already run `ant auth login`, you can skip the `.env` file — the SDK picks up your stored credentials automatically.
+This repo can be turned into a live, public URL with GitHub Pages, at no cost and with no server to run:
 
-## Notes
+1. On GitHub, go to **Settings → Pages**.
+2. Under "Build and deployment", set **Source** to "Deploy from a branch".
+3. Pick this branch and the `/ (root)` folder, then **Save**.
+4. GitHub publishes it at `https://<your-username>.github.io/<repo-name>/` within a minute or two.
 
-- Generated apps run in a sandboxed iframe (`allow-scripts allow-forms allow-modals`, no `allow-same-origin`), so generated code can't reach cookies, storage, or the parent page.
-- Everything Claude generates is client-side only — no external requests, no analytics, no dependencies beyond what ships in the single HTML file.
+That URL is a real, independent website — not affiliated with or hosted by any AI company — and works in any browser, including Safari on iPad.
+
+## Adding a new blueprint
+
+Add an entry to the `RECIPES` array in `templates.js`: an `id`, a `name`, a `blurb`, a list of `keywords` to match against a description, and a `build(promptText)` function that returns a complete, self-contained HTML document (inline `<style>`/`<script>`, no external requests). `matchRecipe()` picks the blueprint with the most keyword hits against what the person typed.
